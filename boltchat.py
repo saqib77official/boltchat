@@ -83,31 +83,89 @@ HOME_HTML = """<!DOCTYPE html>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', sans-serif; }
-    .glass-nav { backdrop-filter: blur(20px); background: rgba(255,255,255,0.9); border-bottom: 1px solid rgba(139,92,246,0.2); }
-    .btn-purple { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
-    .btn-purple:hover { background: linear-gradient(135deg, #7c3aed, #9333ea); transform: translateY(-2px); }
+    .glass-nav { 
+      backdrop-filter: blur(20px); 
+      background: rgba(255,255,255,0.92); 
+      border-bottom: 1px solid rgba(139,92,246,0.2); 
+    }
+    .btn-purple { 
+      background: linear-gradient(135deg, #8b5cf6, #a78bfa); 
+    }
+    .btn-purple:hover { 
+      background: linear-gradient(135deg, #7c3aed, #9333ea); 
+      transform: translateY(-3px); 
+      box-shadow: 0 15px 30px rgba(139,92,246,0.3);
+    }
+    .mobile-menu {
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      transform: translateX(-100%);
+    }
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
     .card-hover { transition: all 0.4s; }
-    .card-hover:hover { transform: translateY(-12px); box-shadow: 0 25px 50px rgba(139,92,246,0.25); }
+    .card-hover:hover { 
+      transform: translateY(-12px); 
+      box-shadow: 0 25px 50px rgba(139,92,246,0.3); 
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 text-gray-900 min-h-screen">
 
-  <!-- Navbar -->
-  <nav class="fixed top-0 w-full glass-nav shadow-lg z-50">
-    <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <h1 class="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">BoltChat</h1>
-      <div class="flex flex-wrap gap-4 sm:gap-8 items-center text-lg">
+  <!-- Fixed Navbar -->
+  <nav class="fixed top-0 w-full glass-nav shadow-xl z-50">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+      
+      <!-- Logo -->
+      <h1 class="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        BoltChat
+      </h1>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center gap-8 text-lg">
         <a href="#features" class="hover:text-purple-600 font-medium transition">Features</a>
         <a href="#about" class="hover:text-purple-600 font-medium transition">About</a>
         {% if session.user_id %}
-          <a href="/dashboard" class="px-8 py-3 btn-purple text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition">Go to Chat</a>
+          <a href="/dashboard" class="px-8 py-3 btn-purple text-white rounded-full font-bold shadow-xl transition">Go to Chat</a>
         {% else %}
-          <a href="/login" class="px-8 py-3 btn-purple text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition">Login</a>
+          <a href="/login" class="px-8 py-3 btn-purple text-white rounded-full font-bold shadow-xl transition">Login</a>
           <a href="/register" class="px-8 py-3 border-2 border-purple-400 text-purple-700 rounded-full font-bold hover:bg-purple-50 transition">Sign Up</a>
         {% endif %}
       </div>
+
+      <!-- Mobile Menu Button -->
+      <button onclick="toggleMenu()" class="md:hidden text-3xl text-purple-700">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Slide Menu -->
+    <div id="mobileMenu" class="mobile-menu fixed inset-y-0 left-0 w-80 bg-white bg-opacity-95 backdrop-blur-2xl shadow-2xl z-50 md:hidden">
+      <div class="p-6 border-b border-purple-100">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">BoltChat</h2>
+          <button onclick="toggleMenu()" class="text-3xl text-purple-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 space-y-6 text-lg">
+        <a href="#features" onclick="toggleMenu()" class="block py-3 hover:text-purple-600 font-medium transition">Features</a>
+        <a href="#about" onclick="toggleMenu()" class="block py-3 hover:text-purple-600 font-medium transition">About</a>
+        <div class="pt-6 space-y-4">
+          {% if session.user_id %}
+            <a href="/dashboard" class="block w-full text-center px-8 py-4 btn-purple text-white rounded-full font-bold shadow-xl transition">Go to Chat</a>
+          {% else %}
+            <a href="/login" class="block w-full text-center px-8 py-4 btn-purple text-white rounded-full font-bold shadow-xl transition">Login</a>
+            <a href="/register" class="block w-full text-center px-8 py-4 border-2 border-purple-400 text-purple-700 rounded-full font-bold hover:bg-purple-50 transition">Sign Up</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </nav>
+
+  <!-- Overlay when menu open -->
+  <div onclick="toggleMenu()" id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
 
   <!-- Hero Section -->
   <section class="pt-32 pb-20 text-center px-6">
@@ -126,7 +184,7 @@ HOME_HTML = """<!DOCTYPE html>
     </div>
   </section>
 
-  <!-- Features -->
+  <!-- Features, About, Footer same as before -->
   <section id="features" class="py-20 bg-white bg-opacity-60 backdrop-blur-sm">
     <div class="max-w-6xl mx-auto px-6 text-center">
       <h2 class="text-4xl md:text-5xl font-bold mb-16 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Why Choose BoltChat?</h2>
@@ -156,7 +214,6 @@ HOME_HTML = """<!DOCTYPE html>
     </div>
   </section>
 
-  <!-- About Section -->
   <section id="about" class="py-20">
     <div class="max-w-6xl mx-auto px-6">
       <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">About the Project</h2>
@@ -182,11 +239,20 @@ HOME_HTML = """<!DOCTYPE html>
     </div>
   </section>
 
-  <!-- Footer -->
   <footer class="bg-gradient-to-r from-purple-900 to-pink-900 text-white py-12 text-center">
-    <p class="text-xl">&copy; 2025 <strong class="text-purple-300">BOLTREACTOR</strong> • Affiliated with KOMPASS TECHNOLOGIES PRIVATE LIMITED</p>
+    <p class="text-xl">© 2025 <strong class="text-purple-300">BOLTREACTOR</strong> • Affiliated with KOMPASS TECHNOLOGIES PRIVATE LIMITED</p>
     <p class="text-sm opacity-80 mt-3">Built with passion by Saqib Ullah</p>
   </footer>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const overlay = document.getElementById('overlay');
+      menu.classList.toggle('open');
+      overlay.classList.toggle('hidden');
+      document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+    }
+  </script>
 </body>
 </html>"""
 
@@ -682,19 +748,102 @@ def profile():
         db.commit()
     avatar_url = url_for("uploaded_file", filename=user.avatar) if user.avatar else "/static/default-avatar.png"
     return f'''<!DOCTYPE html>
-<html><head><title>Profile</title><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-<div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-  <h2 class="text-2xl font-bold mb-6 text-center">Edit Profile</h2>
-  <form method="POST" enctype="multipart/form-data" class="space-y-6">
-    <img src="{avatar_url}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-600">
-    <input type="text" name="name" value="{user.name}" required class="w-full p-4 border border-gray-300 rounded-lg">
-    <input type="file" name="avatar" accept="image/*" class="w-full">
-    <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700">Save Changes</button>
-  </form>
-  <a href="/dashboard" class="block text-center mt-6 text-blue-600 hover:underline">← Back to Chat</a>
-</div>
-</body></html>'''
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile • BoltChat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    body {{
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 35%, #d8b4fe 100%);
+      min-height: 100vh;
+    }}
+    .glass {{
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 15px 35px rgba(139, 92, 246, 0.3);
+    }}
+    .btn-purple {{
+      background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    }}
+    .btn-purple:hover {{
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
+    }}
+    .input-glow:focus {{
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3);
+    }}
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 py-12">
+  <div class="w-full max-w-md">
+    <div class="glass rounded-3xl p-10 shadow-2xl border border-white border-opacity-20">
+      
+      <!-- Header -->
+      <div class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+          BoltChat
+        </h1>
+        <p class="text-white text-xl mt-3 opacity-90">Edit Profile</p>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data" class="space-y-8">
+        
+        <!-- Avatar -->
+        <div class="flex justify-center">
+          <div class="relative group cursor-pointer">
+            <img src="{avatar_url}" 
+                 class="w-40 h-40 rounded-full object-cover ring-8 ring-white ring-opacity-60 shadow-2xl transition-all group-hover:ring-purple-300">
+            <div class="absolute inset-0 rounded-full bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+              <i class="fas fa-camera text-white text-4xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Name Input -->
+        <div>
+          <label class="block text-white font-bold mb-3 text-lg">Full Name</label>
+          <input type="text" name="name" value="{user.name}" required 
+                 class="w-full px-6 py-4 bg-white bg-opacity-20 border border-white border-opacity-40 rounded-2xl text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-white input-glow transition"
+                 placeholder="Enter your name">
+        </div>
+
+        <!-- Avatar Upload -->
+        <div>
+          <label class="block text-white font-bold mb-3 text-lg">Change Photo</label>
+          <input type="file" name="avatar" accept="image/*" 
+                 class="w-full text-white file:mr-5 file:py-3 file:px-8 file:rounded-full file:border-0 file:bg-white file:bg-opacity-25 file:text-purple-700 file:font-bold hover:file:bg-opacity-40 transition">
+        </div>
+
+        <!-- Save Button -->
+        <button type="submit" 
+                class="w-full py-5 btn-purple text-white font-bold text-xl rounded-2xl shadow-2xl transform hover:scale-105 transition">
+          Save Changes
+        </button>
+      </form>
+
+      <!-- Back to Dashboard -->
+      <a href="/dashboard" 
+         class="block text-center mt-8 text-white font-bold text-lg hover:text-purple-200 transition flex items-center justify-center gap-2">
+        Back to Chat
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-white opacity-60 mt-10 text-sm">
+      © 2025 BOLTREACTOR • By Saqib Ullah
+    </p>
+  </div>
+</body>
+</html>'''
 
 @app.route("/api/users")
 @login_required
